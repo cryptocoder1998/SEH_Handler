@@ -9,7 +9,7 @@
 #endif
 
 #include "resource.h"		// main symbols
-
+#include <vector>
 
 // CSEHHandlerApp:
 // See SEH_Handler.cpp for the implementation of this class

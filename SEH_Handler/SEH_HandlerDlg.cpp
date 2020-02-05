@@ -52,7 +52,6 @@ END_MESSAGE_MAP()
 
 CSEHHandlerDlg::CSEHHandlerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SEH_HANDLER_DIALOG, pParent)
-	, m_EchoText(_T(""))
 	, m_Output(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -74,7 +73,7 @@ BEGIN_MESSAGE_MAP(CSEHHandlerDlg, CDialogEx)
 	ON_BN_CLICKED(ID_MINIDUMP_BOX, &CSEHHandlerDlg::OnMiniDumpBtnClicked)
 	ON_BN_CLICKED(ID_RAISE_EXCEPTION, &CSEHHandlerDlg::OnRaiseExceptionBtnClicked)
 	ON_BN_CLICKED(ID_CLEAN_OUTPUT, &CSEHHandlerDlg::OnCleanOutputBtnClicked)
-
+	
 END_MESSAGE_MAP()
 
 
@@ -119,7 +118,10 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 // List all available exceptions to be passed to RaiseException
 void CSEHHandlerDlg::InitExceptionList()
 {
-	
+	for (auto excElem : exceptionsTypes)
+	{
+		m_List.AddString(excElem);
+	}
 }
 
 // Change MiniDump creation flag
@@ -138,9 +140,18 @@ void CSEHHandlerDlg::OnCleanOutputBtnClicked()
 
 void CSEHHandlerDlg::OnRaiseExceptionBtnClicked()
 {
+	if ( m_List.GetCurSel() == LB_ERR )
+	{
+		::MessageBox( NULL, _T("Choose an exception to raise!"), _T("SEH_Handler Error"),   MB_ICONERROR | MB_OK );
+		return;
+	}
+
+	CString chosenException;
+	m_List.GetText(m_List.GetCurSel(), chosenException);
+
 	if(m_CreateMiniDump)
 	{
-          m_ControlOutput.SetWindowTextW(m_Output);
+          m_ControlOutput.SetWindowTextW(chosenException);
 	}
 }
 

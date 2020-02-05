@@ -3,7 +3,33 @@
 //
 
 #pragma once
+#define EXCEPTION_MAX_LENGTH 40
 
+const std::vector<TCHAR*> exceptionsTypes = {
+	_T("EXCEPTION_ACCESS_VIOLATION"),
+	_T("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"),
+	_T("EXCEPTION_BREAKPOINT"),
+	_T("EXCEPTION_DATATYPE_MISALIGNMENT"),
+	_T("EXCEPTION_FLT_DENORMAL_OPERAND"),
+	_T("EXCEPTION_FLT_DIVIDE_BY_ZERO"),
+	_T("EXCEPTION_FLT_INEXACT_RESULT"),
+	_T("EXCEPTION_FLT_INVALID_OPERATION"),
+	_T("EXCEPTION_FLT_OVERFLOW"),
+	_T("EXCEPTION_FLT_STACK_CHECK"),
+	_T("EXCEPTION_FLT_UNDERFLOW"),
+	_T("EXCEPTION_GUARD_PAGE"),
+	_T("EXCEPTION_ILLEGAL_INSTRUCTION"),
+	_T("EXCEPTION_IN_PAGE_ERROR"),
+	_T("EXCEPTION_INT_DIVIDE_BY_ZERO"),
+	_T("EXCEPTION_INT_OVERFLOW"),
+	_T("EXCEPTION_INVALID_DISPOSITION"),
+	_T("EXCEPTION_INVALID_HANDLE"),
+	_T("EXCEPTION_NONCONTINUABLE_EXCEPTION"),
+	_T("EXCEPTION_PRIV_INSTRUCTION"),
+	_T("EXCEPTION_SINGLE_STEP"),
+	_T("EXCEPTION_STACK_OVERFLOW"),
+	_T("STATUS_UNWIND_CONSOLIDATE")
+};
 
 // CSEHHandlerDlg dialog
 class CSEHHandlerDlg : public CDialogEx
@@ -40,12 +66,13 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 private:
-	CString m_EchoText;
 	CListBox m_List;
-	CButton m_MiniDumpButton;
+
 	// Activation flag for minidump creation
+	CButton m_MiniDumpButton;
 	BOOL m_CreateMiniDump = false;
-	 
+	
+	// Value + Control variables for EditText, where minidump will be printed
      CString m_Output;
 	CEdit m_ControlOutput;
 };
