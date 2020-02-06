@@ -61,6 +61,8 @@ const std::vector<DWORD> exceptionDefines = {
 // CSEHHandlerDlg dialog
 class CSEHHandlerDlg : public CDialogEx
 {
+
+	friend LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo );
 // Construction
 public:
 	CSEHHandlerDlg(CWnd* pParent = nullptr);	// standard constructor
@@ -94,9 +96,8 @@ private:
 
 	// Activation flag for minidump creation
 	CButton m_MiniDumpButton;
-	BOOL m_CreateMiniDump = false;
+	BOOL m_CreateMiniDump;
 	
-	// Value + Control variables for EditText, where minidump will be printed
-     CString m_Output;
+	// Control variables for EditText, where minidump will be printed
 	CEdit m_ControlOutput;
 };

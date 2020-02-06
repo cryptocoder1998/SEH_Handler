@@ -11,15 +11,14 @@
 #define new DEBUG_NEW
 #endif
 
-
-
+CString g_Output;
 
 
 // CSEHHandlerDlg dialog
 
 CSEHHandlerDlg::CSEHHandlerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SEH_HANDLER_DIALOG, pParent)
-	, m_Output(_T(""))
+	, m_CreateMiniDump(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -29,7 +28,7 @@ void CSEHHandlerDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, ID_EXCEPTIONS_LIST, m_List);
 	DDX_Control(pDX, ID_MINIDUMP_BOX, m_MiniDumpButton);
-	DDX_Text(pDX, ID_EXCEPTION_RES, m_Output);
+	DDX_Text(pDX, ID_EXCEPTION_RES, g_Output);
 	DDX_Control(pDX, ID_EXCEPTION_RES, m_ControlOutput);
 }
 
@@ -77,7 +76,7 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	InitExceptionList();
-	SetUnhandledExceptionFilter( CustomUnhandledExceptionFilter );
+	
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -85,7 +84,22 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 // Callback for win32 exceptions
 LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
 {
+	BOOL createDump = ( ExceptionInfo->ExceptionRecord->ExceptionFlags == 1 ) ? TRUE : FALSE;  
+	
+	// creating minidump
+	if ( createDump )
+	{
 
+	}
+	else // showing MessageBox with error information
+	{
+		auto elem = std::find( exceptionDefines.begin(), exceptionDefines.end(),
+			ExceptionInfo->ExceptionRecord->ExceptionCode );
+		int index = std::distance(exceptionDefines.begin(), elem);
+
+		::MessageBoxW( NULL, exceptionsTypes[index], _T("RaiseException information"), MB_ICONEXCLAMATION | MB_OK );
+	}
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 
 
@@ -108,7 +122,7 @@ void CSEHHandlerDlg::OnMiniDumpBtnClicked()
 // Clean output window
 void CSEHHandlerDlg::OnCleanOutputBtnClicked()
 {
-	m_Output.Empty();
+	g_Output.Empty();
 	m_ControlOutput.SetWindowText( _T("") );
 }
 
@@ -120,13 +134,21 @@ void CSEHHandlerDlg::OnRaiseExceptionBtnClicked()
 		return;
 	}
 
-	CString chosenException;
+	// Get selected exception DWORD code for RaiseException
 	int chosenIdx = m_List.GetCurSel();
 	
-	RaiseException( exceptionDefines[chosenIdx], 0, 0, NULL );
 	
+	__try {
+		RaiseException( exceptionDefines[chosenIdx], m_CreateMiniDump? 1 : 0, 0, NULL );
+	}
+	__except( CustomUnhandledExceptionFilter( GetExceptionInformation() ) )
+	{
+
+	}
+
 	if ( m_CreateMiniDump )
 	{
-          m_ControlOutput.SetWindowTextW(m_Output);
+		
+		m_ControlOutput.SetWindowTextW(g_Output);
 	}
 }
