@@ -1,4 +1,3 @@
-
 // SEH_HandlerDlg.cpp : implementation file
 //
 
@@ -13,42 +12,10 @@
 #endif
 
 
-// CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialogEx
-{
-public:
-	CAboutDlg();
-
-// Dialog Data
-#ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_ABOUTBOX };
-#endif
-
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
 
 
 // CSEHHandlerDlg dialog
-
-
 
 CSEHHandlerDlg::CSEHHandlerDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SEH_HANDLER_DIALOG, pParent)
@@ -110,15 +77,22 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	InitExceptionList();
-
+	SetUnhandledExceptionFilter( CustomUnhandledExceptionFilter );
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+// Callback for win32 exceptions
+LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
+{
+
+}
+
+
 // List all available exceptions to be passed to RaiseException
 void CSEHHandlerDlg::InitExceptionList()
 {
-	for (auto excElem : exceptionsTypes)
+	for ( auto excElem : exceptionsTypes )
 	{
 		m_List.AddString(excElem);
 	}
@@ -127,7 +101,7 @@ void CSEHHandlerDlg::InitExceptionList()
 // Change MiniDump creation flag
 void CSEHHandlerDlg::OnMiniDumpBtnClicked()
 {
-	m_ControlOutput.EnableWindow(m_CreateMiniDump ? FALSE : TRUE);
+	m_ControlOutput.EnableWindow( m_CreateMiniDump ? FALSE : TRUE );
 	m_CreateMiniDump = !m_CreateMiniDump;
 }
 
@@ -135,7 +109,7 @@ void CSEHHandlerDlg::OnMiniDumpBtnClicked()
 void CSEHHandlerDlg::OnCleanOutputBtnClicked()
 {
 	m_Output.Empty();
-	m_ControlOutput.SetWindowText(_T(""));
+	m_ControlOutput.SetWindowText( _T("") );
 }
 
 void CSEHHandlerDlg::OnRaiseExceptionBtnClicked()
@@ -147,31 +121,12 @@ void CSEHHandlerDlg::OnRaiseExceptionBtnClicked()
 	}
 
 	CString chosenException;
-	m_List.GetText(m_List.GetCurSel(), chosenException);
-
-	if(m_CreateMiniDump)
+	int chosenIdx = m_List.GetCurSel();
+	
+	RaiseException( exceptionDefines[chosenIdx], 0, 0, NULL );
+	
+	if ( m_CreateMiniDump )
 	{
-          m_ControlOutput.SetWindowTextW(chosenException);
+          m_ControlOutput.SetWindowTextW(m_Output);
 	}
-}
-
-void CSEHHandlerDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialogEx::OnSysCommand(nID, lParam);
-	}
-}
-
-
-// The system calls this function to obtain the cursor to display while the user drags
-//  the minimized window.
-HCURSOR CSEHHandlerDlg::OnQueryDragIcon()
-{
-	return static_cast<HCURSOR>(m_hIcon);
 }
