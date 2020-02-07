@@ -76,7 +76,7 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	InitExceptionList();
-	
+	SetUnhandledExceptionFilter( CustomUnhandledExceptionFilter );
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -86,7 +86,7 @@ LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
 {
 	BOOL createDump = ( ExceptionInfo->ExceptionRecord->ExceptionFlags == 1 ) ? TRUE : FALSE;  
 	
-	// creating minidump
+	// creating minidump for output windows
 	if ( createDump )
 	{
 
@@ -95,9 +95,14 @@ LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
 	{
 		auto elem = std::find( exceptionDefines.begin(), exceptionDefines.end(),
 			ExceptionInfo->ExceptionRecord->ExceptionCode );
-		int index = std::distance(exceptionDefines.begin(), elem);
-
-		::MessageBoxW( NULL, exceptionsTypes[index], _T("RaiseException information"), MB_ICONEXCLAMATION | MB_OK );
+		int index = std::distance( exceptionDefines.begin(), elem );
+		
+		TCHAR messageError[EXCEPTION_MAX_LENGTH] = {0};
+		_tcscat_s( messageError, exceptionsTypes[index] );
+		_tcscat_s( messageError, _T(" was caught by filter\r\n") );
+		_stprintf_s( messageError + _tcslen(messageError), EXCEPTION_MAX_LENGTH - _tcslen(messageError), _T("Exception address: 0x%p\r\n"), 
+			ExceptionInfo->ExceptionRecord->ExceptionAddress );
+		::MessageBoxW( NULL, messageError, _T("RaiseException information"), MB_ICONEXCLAMATION | MB_OK );
 	}
 	return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -148,7 +153,6 @@ void CSEHHandlerDlg::OnRaiseExceptionBtnClicked()
 
 	if ( m_CreateMiniDump )
 	{
-		
 		m_ControlOutput.SetWindowTextW(g_Output);
 	}
 }

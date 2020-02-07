@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#define EXCEPTION_MAX_LENGTH 40
+#define EXCEPTION_MAX_LENGTH 256
 #include <vector>
 
 const std::vector<TCHAR*> exceptionsTypes = {
