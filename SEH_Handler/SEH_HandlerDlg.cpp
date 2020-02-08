@@ -77,7 +77,7 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	InitExceptionList();
 	SetUnhandledExceptionFilter( CustomUnhandledExceptionFilter );
-
+	g_Output = _T("\0");
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -85,11 +85,21 @@ BOOL CSEHHandlerDlg::OnInitDialog()
 LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
 {
 	BOOL createDump = ( ExceptionInfo->ExceptionRecord->ExceptionFlags == 1 ) ? TRUE : FALSE;  
-	
+	TCHAR messageError[EXCEPTION_MAX_LENGTH] = {0};
+
 	// creating minidump for output windows
 	if ( createDump )
 	{
+		g_Output.Append( _T( "EXCEPTION INFORMATION:\r\n" ) );
+		
+		_stprintf_s( messageError + _tcslen(messageError), EXCEPTION_MAX_LENGTH - _tcslen( messageError ),
+			_T( "Exception code: 0x%X\r\nExceptionAddress: 0x%p\r\n" ),
+			ExceptionInfo->ExceptionRecord->ExceptionCode, 
+			ExceptionInfo->ExceptionRecord->ExceptionAddress 
+		);
 
+		g_Output.Append( messageError );
+		memset( messageError, 0, EXCEPTION_MAX_LENGTH );
 	}
 	else // showing MessageBox with error information
 	{
@@ -97,12 +107,12 @@ LONG WINAPI CustomUnhandledExceptionFilter( _EXCEPTION_POINTERS* ExceptionInfo )
 			ExceptionInfo->ExceptionRecord->ExceptionCode );
 		int index = std::distance( exceptionDefines.begin(), elem );
 		
-		TCHAR messageError[EXCEPTION_MAX_LENGTH] = {0};
+		
 		_tcscat_s( messageError, exceptionsTypes[index] );
-		_tcscat_s( messageError, _T(" was caught by filter\r\n") );
-		_stprintf_s( messageError + _tcslen(messageError), EXCEPTION_MAX_LENGTH - _tcslen(messageError), _T("Exception address: 0x%p\r\n"), 
+		_tcscat_s( messageError, _T( " was caught by filter\r\n" ) );
+		_stprintf_s( messageError + _tcslen(messageError), EXCEPTION_MAX_LENGTH - _tcslen( messageError ), _T( "Exception address: 0x%p\r\n" ), 
 			ExceptionInfo->ExceptionRecord->ExceptionAddress );
-		::MessageBoxW( NULL, messageError, _T("RaiseException information"), MB_ICONEXCLAMATION | MB_OK );
+		::MessageBoxW( NULL, messageError, _T( "RaiseException information" ), MB_ICONEXCLAMATION | MB_OK );
 	}
 	return EXCEPTION_EXECUTE_HANDLER;
 }
